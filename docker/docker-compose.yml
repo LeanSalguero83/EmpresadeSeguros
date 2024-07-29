@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+  app:
+    image: 'docker.io/best_insurance/api:latest'
+    container_name: app
+    depends_on:
+      db:
+        condition: service_started
+      oauth:
+        condition: service_started
+    ports:
+      - '8080:8080'
+      - '5005:5005'
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/compose-postgres
+      - SPRING_DATASOURCE_USERNAME=compose-postgres
+      - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - EVENTLISTENER_QUEUE_NAME=subscriptionLogQueue
+      - BPL_DEBUG_ENABLED=true
+      - BPL_DEBUG_PORT=5005
+      - BPL_DEBUG_SUSPEND=false
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER-URI=http://auth-server:9090
+      - SPRINGDOC_SWAGGER-UI_OAUTH_CLIENTID=api-client
+      - SPRINGDOC_SWAGGER-UI_OAUTH_CLIENTSECRET=secret
+      - SPRINGDOC_OAUTHFLOW_AUTHORIZATIONURL=http://auth-server:9090/oauth2/authorize
+      - SPRINGDOC_OAUTHFLOW_TOKENURL=http://auth-server:9090/oauth2/token
+  oauth:
+    image: 'oauth2server:latest'
+    build:
+      context: .
+      dockerfile: Dockerfile.oauth2TestServer
+    container_name: oauth
+    hostname: auth-server
+    ports:
+      - '9090:9090'
+
+  db:
+    image: 'postgres:14.5-alpine'
+    container_name: db
+    ports:
+      - '55432:5432'
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres

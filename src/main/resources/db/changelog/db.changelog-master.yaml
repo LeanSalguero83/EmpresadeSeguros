@@ -1,0 +1,34 @@
+databaseChangeLog:
+- include:
+    file: db/changelog/001-ddl-definition.sql
+- changeSet:
+      id: load-countries-data
+      labels: countries-states-cities-data
+      author: jpa_dev
+      changes:
+          - loadData:
+                tableName: countries
+                usePreparedStatements: false
+                separator: ','
+                relativeToChangelogFile: true
+                file: changelog/countries_data.csv
+                encoding: UTF-8
+                quotchar:  '"'
+          - loadData:
+                tableName: states
+                usePreparedStatements: false
+                separator: ','
+                relativeToChangelogFile: true
+                file: changelog/states_data.csv
+                encoding: UTF-8
+                quotchar:  '"'
+          - loadData:
+                tableName: cities
+                usePreparedStatements: false
+                separator: ','
+                relativeToChangelogFile: true
+                file: changelog/cities_data.csv
+                encoding: UTF-8
+                quotchar:  '"'
+- include:
+        file: db/changelog/002-prj4-changes.sql
